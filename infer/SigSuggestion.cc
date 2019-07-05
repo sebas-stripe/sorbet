@@ -145,7 +145,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::Loc bindLoc, cfg::Sen
         }
         core::TypePtr thisType;
         auto iter = &dispatchInfo;
-        while(iter != nullptr) {
+        while (iter != nullptr) {
             auto argType = extractArgType(ctx, *snd, iter->main, i);
             if (argType && !argType->isUntyped()) {
                 if (!thisType) {

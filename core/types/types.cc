@@ -3,10 +3,10 @@
 #include "common/common.h"
 #include "common/typecase.h"
 #include "core/Context.h"
+#include "core/GlobalState.h"
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/TypeConstraint.h"
-#include "core/GlobalState.h"
 #include <utility>
 
 #include "core/Types.h"
@@ -23,14 +23,14 @@ using namespace std;
 
 TypePtr Types::dispatchCallWithoutBlock(Context ctx, const TypePtr &recv, DispatchArgs args) {
     auto dispatched = recv->dispatchCall(ctx, move(args));
-                auto link = &dispatched;
-                while (link != nullptr) {
-                    for (auto &err : link->main.errors) {
-                        ctx.state._error(move(err));
-                    }
-                    link = link->secondary.get();
-                }
-  return move(dispatched.returnType);
+    auto link = &dispatched;
+    while (link != nullptr) {
+        for (auto &err : link->main.errors) {
+            ctx.state._error(move(err));
+        }
+        link = link->secondary.get();
+    }
+    return move(dispatched.returnType);
 }
 
 TypePtr::TypePtr(shared_ptr<Type> &&store) : store(move(store)){};
@@ -752,8 +752,7 @@ bool ShapeType::hasUntyped() {
     }
     return false;
 };
-SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags)
-    : argFlags(argFlags), fun(fun) {}
+SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags) : argFlags(argFlags), fun(fun) {}
 
 shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {
     auto copy = *this;
