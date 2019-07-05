@@ -62,4 +62,19 @@ core::TypePtr QueryResponse::getRetType() const {
         return core::TypePtr();
     }
 }
+
+const core::TypeAndOrigins &QueryResponse::getTypeAndOrigins() const {
+    if (auto ident = isIdent()) {
+        return ident->retType;
+    } else if (auto literal = isLiteral()) {
+        return literal->retType;
+    } else if (auto constant = isConstant()) {
+        return constant->retType;
+    } else if (auto def = isDefinition()) {
+        return def->retType;
+    } else {
+        Exception::raise("QueryResponse is of type that does not have TypeAndOrigins.");
+    }
+}
+
 } // namespace sorbet::core::lsp

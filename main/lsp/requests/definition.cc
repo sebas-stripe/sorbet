@@ -30,8 +30,9 @@ LSPResult LSPLoop::handleTextDocumentDefinition(unique_ptr<core::GlobalState> gs
         if (!queryResponses.empty()) {
             auto resp = move(queryResponses[0]);
 
-            if (auto identResp = resp->isIdent()) {
-                for (auto &originLoc : identResp->retType.origins) {
+            if (resp->isIdent() || resp->isConstant() || resp->isLiteral()) {
+                auto retType = resp->getTypeAndOrigins();
+                for (auto &originLoc : retType.origins) {
                     addLocIfExists(*gs, result, originLoc);
                 }
             } else if (auto defResp = resp->isDefinition()) {

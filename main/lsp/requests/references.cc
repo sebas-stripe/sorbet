@@ -28,7 +28,7 @@ LSPResult LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs
             auto resp = move(queryResponses[0]);
 
             if (auto constResp = resp->isConstant()) {
-                if (!constResp->symbol.exists()) {
+                if (constResp->symbol.exists()) {
                     auto symRef = constResp->symbol;
                     auto run2 = setupLSPQueryBySymbol(move(gs), symRef);
                     gs = move(run2.gs);
