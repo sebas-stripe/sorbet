@@ -37,6 +37,12 @@ DispatchResult OrType::dispatchCall(Context ctx, DispatchArgs args) {
 TypePtr OrType::getCallArguments(Context ctx, NameRef name) {
     auto largs = left->getCallArguments(ctx, name); // TODO: should glb with right
     auto rargs = right->getCallArguments(ctx, name);
+    if (!largs) {
+        largs = Types::untypedUntracked();
+    }
+    if (!rargs) {
+        rargs = Types::untypedUntracked();
+    }
     return Types::glb(ctx, largs, rargs);
 }
 
