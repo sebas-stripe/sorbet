@@ -304,6 +304,22 @@ module T::Private::Methods
     return if @installed_hooks.include?(mod)
     @installed_hooks << mod
 
+    if !mod.is_a?(Class)
+      # mod is not a Class, so it's just a regular Module and therefore can be included and extended.
+      orig_included = T::Private::ClassUtils.replace_method(mod.singleton_class, :included) do |arg|
+        if arg.is_a?(Module)
+          T::Private::Methods.install_hooks(arg)
+        end
+        orig_included.bind(self).call(arg)
+      end
+      orig_extended = T::Private::ClassUtils.replace_method(mod.singleton_class, :extended) do |arg|
+        if arg.is_a?(Module)
+          T::Private::Methods.install_hooks(arg)
+        end
+        orig_extended.bind(self).call(arg)
+      end
+    end
+
     if mod.singleton_class?
       install_singleton_method_added_hook(mod)
     else
