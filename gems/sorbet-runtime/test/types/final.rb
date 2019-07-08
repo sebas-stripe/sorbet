@@ -22,7 +22,7 @@ class Opus::Types::Test::FinalTest < Critic::Unit::UnitTest
     end
   end
 
-  it "forbids redefining a final instance method" do
+  it "forbids redefining a final instance method with a final sig" do
     err = assert_raises(RuntimeError) do
       Class.new do
         extend T::Sig
@@ -35,7 +35,7 @@ class Opus::Types::Test::FinalTest < Critic::Unit::UnitTest
     assert_includes(err.message, "was declared as final and cannot be redefined")
   end
 
-  it "forbids redefining a final class method" do
+  it "forbids redefining a final class method with a final sig" do
     err = assert_raises(RuntimeError) do
       Class.new do
         extend T::Sig
