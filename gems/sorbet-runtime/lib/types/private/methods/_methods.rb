@@ -6,6 +6,9 @@ module T::Private::Methods
   @signatures_by_method = {}
   @sig_wrappers = {}
   @sigs_that_raised = {}
+  # if a module includes a module with final methods, that module should start doing the final checks - that is, it
+  # should have the hooks installed on itself - if it wasn't already.
+  @modules_with_final_methods = Set.new
 
   ARG_NOT_PROVIDED = Object.new
   PROC_TYPE = Object.new
@@ -296,6 +299,10 @@ module T::Private::Methods
     end
   end
 
+  def self.has_final_methods?(mod)
+    @modules_with_final_methods.include?(mod)
+  end
+
   def self.install_hooks(mod)
     return if @installed_hooks.include?(mod)
     @installed_hooks << mod
@@ -308,14 +315,18 @@ module T::Private::Methods
       # `M.included` or `M.extended` (for instance, by uttering `include T::Props::Plugin` in the body of `M`), then the
       # original method we would save here no longer refers to that new method. So instead, resolve the "original"
       # method with `super`.
+      #
+      # Note also that we check `T::Private::Methods.has_final_methods?(mod)` not now, but when included/extended is
+      # called. This is because it might be that a module doesn't have final methods when it had the hooks installed on
+      # it, but gets some later.
       T::Private::ClassUtils.replace_method(mod.singleton_class, :included) do |arg|
-        if arg.is_a?(Module)
+        if arg.is_a?(Module) && T::Private::Methods.has_final_methods?(mod)
           T::Private::Methods.install_hooks(arg)
         end
         super(arg)
       end
       T::Private::ClassUtils.replace_method(mod.singleton_class, :extended) do |arg|
-        if arg.is_a?(Module)
+        if arg.is_a?(Module) && T::Private::Methods.has_final_methods?(mod)
           T::Private::Methods.install_hooks(arg)
         end
         super(arg)
