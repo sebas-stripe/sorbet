@@ -301,8 +301,9 @@ module T::Private::Methods
     @installed_hooks << mod
 
     if !mod.is_a?(Class)
-      # mod is not a Class, so it's just a regular Module and therefore can be included and extended. Note that we use
-      # `super` here instead of saving the original method as `orig` and then calling it with
+      # mod is not a Class, so it's just a regular Module and therefore can be included and extended.
+      #
+      # Note that we use `super` here instead of saving the original method as `orig` and then calling it with
       # `orig.bind(self).call(arg)`. This is because if, after installing hooks on a module `M`, we redefine
       # `M.included` or `M.extended` (for instance, by uttering `include T::Props::Plugin` in the body of `M`), then the
       # original method we would save here no longer refers to that new method. So instead, resolve the "original"
